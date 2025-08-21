@@ -7,6 +7,8 @@
 	import Button from "$lib/design/Button.svelte"
 	import PokemonSummary from "./PokemonSummary.svelte"
 	import ListHeading from "$lib/design/ListHeading.svelte"
+	import { dndzone } from 'svelte-dnd-action';
+
 
 	export let trainer: TrainerStore
 	export let currentPokemon: PokemonId | undefined
@@ -42,13 +44,19 @@
 </div>
 <div class="relative"><!-- Needed for the > indicators to appear outside the scroll box -->
 	<div class="scrollable">
-		<ul class="nolist no-space partial-width">
-			{#each filtered as p (p.id)}
-					<li class="space-after">
-						<PokemonSummary trainer={$trainer.info.readKey} pokemon={p} />
-					</li>
-			{/each}
-		</ul>
+		<ul
+	class="pokemon-list"
+	use:dndzone={{ items: trainer.pokemon, flipDurationMs: 300 }}
+	on:consider={(e) => (trainer.pokemon = e.detail.items)}
+	on:finalize={(e) => (trainer.pokemon = e.detail.items)}
+>
+	{#each trainer.pokemon as poke (poke.id)}
+		<li class="pokemon-item" data-id={poke.id}>
+			<PokemonSummary {poke} />
+		</li>
+	{/each}
+</ul>
+
 	</div>
 </div>
 
@@ -83,4 +91,13 @@
 		height: 0;
 		flex: 1;
 	}
+.pokemon-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pokemon-item {
+  margin-bottom: 0.5em;
+}
 </style>
